@@ -1,0 +1,133 @@
+diff --git a/drivers/dummy/rasterizer_dummy.h b/drivers/dummy/rasterizer_dummy.h
+index 37e8c4358b..2997140339 100644
+--- a/drivers/dummy/rasterizer_dummy.h
++++ b/drivers/dummy/rasterizer_dummy.h
+@@ -213,6 +213,7 @@ public:
+ 
+ 	VisualServer::TextureType texture_get_type(RID p_texture) const { return VS::TEXTURE_TYPE_2D; }
+ 	uint32_t texture_get_texid(RID p_texture) const { return 0; }
++	uint32_t texture_get_fbo(RID p_texture) const { return 0; }
+ 	uint32_t texture_get_width(RID p_texture) const { return 0; }
+ 	uint32_t texture_get_height(RID p_texture) const { return 0; }
+ 	uint32_t texture_get_depth(RID p_texture) const { return 0; }
+diff --git a/drivers/gles2/rasterizer_storage_gles2.cpp b/drivers/gles2/rasterizer_storage_gles2.cpp
+index 8e0fdcd4cb..688929edcd 100644
+--- a/drivers/gles2/rasterizer_storage_gles2.cpp
++++ b/drivers/gles2/rasterizer_storage_gles2.cpp
+@@ -983,6 +983,14 @@ uint32_t RasterizerStorageGLES2::texture_get_texid(RID p_texture) const {
+ 	return texture->tex_id;
+ }
+ 
++uint32_t RasterizerStorageGLES2::texture_get_fbo(RID p_texture) const {
++	Texture *texture = texture_owner.getornull(p_texture);
++
++	ERR_FAIL_COND_V(!texture, 0);
++
++	return (uint32_t)texture->render_target->fbo;
++}
++
+ void RasterizerStorageGLES2::texture_bind(RID p_texture, uint32_t p_texture_no) {
+ 	Texture *texture = texture_owner.getornull(p_texture);
+ 
+diff --git a/drivers/gles2/rasterizer_storage_gles2.h b/drivers/gles2/rasterizer_storage_gles2.h
+index 47994aa8a1..3c991fc204 100644
+--- a/drivers/gles2/rasterizer_storage_gles2.h
++++ b/drivers/gles2/rasterizer_storage_gles2.h
+@@ -354,6 +354,7 @@ public:
+ 	virtual Image::Format texture_get_format(RID p_texture) const;
+ 	virtual VS::TextureType texture_get_type(RID p_texture) const;
+ 	virtual uint32_t texture_get_texid(RID p_texture) const;
++	virtual uint32_t texture_get_fbo(RID p_texture) const;
+ 	virtual uint32_t texture_get_width(RID p_texture) const;
+ 	virtual uint32_t texture_get_height(RID p_texture) const;
+ 	virtual uint32_t texture_get_depth(RID p_texture) const;
+diff --git a/drivers/gles3/rasterizer_storage_gles3.cpp b/drivers/gles3/rasterizer_storage_gles3.cpp
+index 2a3631fdb8..4df1111819 100644
+--- a/drivers/gles3/rasterizer_storage_gles3.cpp
++++ b/drivers/gles3/rasterizer_storage_gles3.cpp
+@@ -1370,6 +1370,13 @@ uint32_t RasterizerStorageGLES3::texture_get_texid(RID p_texture) const {
+ 
+ 	return texture->tex_id;
+ }
++uint32_t RasterizerStorageGLES3::texture_get_fbo(RID p_texture) const {
++	Texture *texture = texture_owner.get(p_texture);
++
++	ERR_FAIL_COND_V(!texture, 0);
++
++	return (uint32_t)texture->render_target->fbo;
++}
+ void RasterizerStorageGLES3::texture_bind(RID p_texture, uint32_t p_texture_no) {
+ 	Texture *texture = texture_owner.getornull(p_texture);
+ 
+diff --git a/drivers/gles3/rasterizer_storage_gles3.h b/drivers/gles3/rasterizer_storage_gles3.h
+index 5d004b9f3b..49f994a676 100644
+--- a/drivers/gles3/rasterizer_storage_gles3.h
++++ b/drivers/gles3/rasterizer_storage_gles3.h
+@@ -350,6 +350,7 @@ public:
+ 	virtual Image::Format texture_get_format(RID p_texture) const;
+ 	virtual VS::TextureType texture_get_type(RID p_texture) const;
+ 	virtual uint32_t texture_get_texid(RID p_texture) const;
++	virtual uint32_t texture_get_fbo(RID p_texture) const;
+ 	virtual uint32_t texture_get_width(RID p_texture) const;
+ 	virtual uint32_t texture_get_height(RID p_texture) const;
+ 	virtual uint32_t texture_get_depth(RID p_texture) const;
+diff --git a/servers/visual/rasterizer.h b/servers/visual/rasterizer.h
+index 3763526465..01d15446c0 100644
+--- a/servers/visual/rasterizer.h
++++ b/servers/visual/rasterizer.h
+@@ -203,6 +203,7 @@ public:
+ 	virtual Image::Format texture_get_format(RID p_texture) const = 0;
+ 	virtual VS::TextureType texture_get_type(RID p_texture) const = 0;
+ 	virtual uint32_t texture_get_texid(RID p_texture) const = 0;
++	virtual uint32_t texture_get_fbo(RID p_texture) const = 0;
+ 	virtual uint32_t texture_get_width(RID p_texture) const = 0;
+ 	virtual uint32_t texture_get_height(RID p_texture) const = 0;
+ 	virtual uint32_t texture_get_depth(RID p_texture) const = 0;
+diff --git a/servers/visual/visual_server_raster.h b/servers/visual/visual_server_raster.h
+index 97a28cdba6..50b119ba54 100644
+--- a/servers/visual/visual_server_raster.h
++++ b/servers/visual/visual_server_raster.h
+@@ -150,6 +150,7 @@ public:
+ 	BIND1RC(Image::Format, texture_get_format, RID)
+ 	BIND1RC(TextureType, texture_get_type, RID)
+ 	BIND1RC(uint32_t, texture_get_texid, RID)
++	BIND1RC(uint32_t, texture_get_fbo, RID)
+ 	BIND1RC(uint32_t, texture_get_width, RID)
+ 	BIND1RC(uint32_t, texture_get_height, RID)
+ 	BIND1RC(uint32_t, texture_get_depth, RID)
+diff --git a/servers/visual/visual_server_wrap_mt.h b/servers/visual/visual_server_wrap_mt.h
+index d8d35de20d..909f12964b 100644
+--- a/servers/visual/visual_server_wrap_mt.h
++++ b/servers/visual/visual_server_wrap_mt.h
+@@ -88,6 +88,7 @@ public:
+ 	FUNC1RC(Image::Format, texture_get_format, RID)
+ 	FUNC1RC(TextureType, texture_get_type, RID)
+ 	FUNC1RC(uint32_t, texture_get_texid, RID)
++	FUNC1RC(uint32_t, texture_get_fbo, RID)
+ 	FUNC1RC(uint32_t, texture_get_width, RID)
+ 	FUNC1RC(uint32_t, texture_get_height, RID)
+ 	FUNC1RC(uint32_t, texture_get_depth, RID)
+diff --git a/servers/visual_server.cpp b/servers/visual_server.cpp
+index 9d2053872f..c83b44ab71 100644
+--- a/servers/visual_server.cpp
++++ b/servers/visual_server.cpp
+@@ -1847,6 +1847,7 @@ void VisualServer::_bind_methods() {
+ 	ClassDB::bind_method(D_METHOD("texture_get_format", "texture"), &VisualServer::texture_get_format);
+ 	ClassDB::bind_method(D_METHOD("texture_get_type", "texture"), &VisualServer::texture_get_type);
+ 	ClassDB::bind_method(D_METHOD("texture_get_texid", "texture"), &VisualServer::texture_get_texid);
++	ClassDB::bind_method(D_METHOD("texture_get_fbo", "texture"), &VisualServer::texture_get_fbo);
+ 	ClassDB::bind_method(D_METHOD("texture_get_width", "texture"), &VisualServer::texture_get_width);
+ 	ClassDB::bind_method(D_METHOD("texture_get_height", "texture"), &VisualServer::texture_get_height);
+ 	ClassDB::bind_method(D_METHOD("texture_get_depth", "texture"), &VisualServer::texture_get_depth);
+diff --git a/servers/visual_server.h b/servers/visual_server.h
+index 99037e86f5..a02968649b 100644
+--- a/servers/visual_server.h
++++ b/servers/visual_server.h
+@@ -140,6 +140,7 @@ public:
+ 	virtual Image::Format texture_get_format(RID p_texture) const = 0;
+ 	virtual TextureType texture_get_type(RID p_texture) const = 0;
+ 	virtual uint32_t texture_get_texid(RID p_texture) const = 0;
++	virtual uint32_t texture_get_fbo(RID p_texture) const = 0;
+ 	virtual uint32_t texture_get_width(RID p_texture) const = 0;
+ 	virtual uint32_t texture_get_height(RID p_texture) const = 0;
+ 	virtual uint32_t texture_get_depth(RID p_texture) const = 0;

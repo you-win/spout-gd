@@ -1,0 +1,37 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://main.gd" type="Script" id=1]
+
+[node name="Main" type="CanvasLayer"]
+script = ExtResource( 1 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.152941, 0.152941, 0.152941, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_left = 0.174
+anchor_top = 0.221
+anchor_right = 0.866
+anchor_bottom = 0.686
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+margin_right = 708.0
+margin_bottom = 14.0
+text = "We're doing stuff!"
+align = 1
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer"]
+margin_top = 18.0
+margin_right = 708.0
+margin_bottom = 42.0
+
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
