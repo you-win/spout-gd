@@ -1,4 +1,7 @@
 # spout-gd
+
+[![Chat on Discord](https://img.shields.io/discord/853476898071117865?label=chat&logo=discord)](https://discord.gg/6mcdWWBkrr)
+
 An engine module for Godot 3.4.2 that adds support for [Spout2](https://github.com/leadedge/Spout2). This module uses [SpoutLibrary](https://spoutlibrary-site.netlify.app/#File:SpoutLibrary.cpp).
 
 Spout is Windows-only as noted on their [website](https://spout.zeal.co/).
@@ -14,22 +17,22 @@ Spout is Windows-only as noted on their [website](https://spout.zeal.co/).
 
 ## Usage
 Send the default `icon.png` file over Spout. NOTE: This is cpu-bound and is slow relatively to Spout's full capabilities.
-```
-var spout: SpoutGD
+```GDScript
+var spout: Spout
 var image := Image.new()
 
 func _ready():
 	image.load("res://icon.png")
-	spout = SpoutGD.new()
-	spout.set_size(image.get_width(), image.get_height()) # Implicitly used by SpoutGD when sending the image
+	spout = Spout.new()
+	spout.send_size = Vector2(image.get_width(), image.get_height()) # Implicitly used by SpoutGD when sending the image
 
 func _process(delta):
-	spout.send_image(image)
+	spout.sender_send_image(image)
 ```
 
 Send the viewport over Spout. This utilizes the GPU and, in theory, should be very fast.
-```
-var spout: SpoutGD
+```GDScript
+var spout: Spout
 
 var viewport: Viewport
 var viewport_fbo: int # The OpenGL framebuffer object (fbo)
@@ -37,13 +40,13 @@ var viewport_fbo: int # The OpenGL framebuffer object (fbo)
 func _ready():
 	viewport = get_viewport()
 
-	spout = SpoutGD.new()
-	spout.set_size(viewport.size.x, viewport.size.y) # According to the Spout docs, this isn't necessary
+	spout = Spout.new()
+	spout.send_size = viewport.size # According to the Spout docs, this isn't necessary
 
 	# texture_get_fbo must be patched in since this isn't normally exposed by Godot
 	viewport_fbo = VisualServer.texture_get_fbo(VisualServer.viewport_get_texture(viewport.get_viewport_rid()))
 	
 func _process(delta):
-	spout.send_screen(viewport_fbo)
+	spout.sender_send_fbo(viewport_fbo)
 ```
 
