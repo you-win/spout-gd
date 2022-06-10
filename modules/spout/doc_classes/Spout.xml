@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="Spout" inherits="Reference" version="3.4">
+	<brief_description>
+        A Spout2 sender (implemented) and receiver (todo)
+	</brief_description>
+	<description>
+        A Spout2 sender (implemented) and receiver (todo). Uses SpoutLibrary for its implementation.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+        <!-- Sender -->
+
+        <method name="sender_set_sender_name">
+            <return type="void" />
+            <argument index="0" name="sender_name" type="String" default="&quot;&quot;" />
+            <description>
+                Set name for sender creation.
+                If no name is specified, the executable name is used. Thereafter, all sending functions create and update a sender based on the size passed and the name that has been set.
+            </description>
+        </method>
+        <method name="sender_release_sender">
+            <return type="bool" />
+            <argument index="0" name="msec" type="int" default="0" />
+            <description>
+                Close receiver and and release resources.
+                A new sender is created or updated by all sending functions.
+            </description>
+        </method>
+        <method name="sender_send_fbo">
+            <return type="Error" />
+            <argument index="0" name="fbo_id" type="int" />
+            <description>
+                Send a texture attached to an fbo.
+                The fbo must be currently bound. The sending texture can be larger than the size that the sender is set up for. For example, if the application is using only a portion of the allocated texture space (e.g. Freeframe plugins).
+            </description>
+        </method>
+        <method name="sender_send_texture">
+            <return type="Error" />
+            <argument index="0" name="godot_texture_id" type="int" />
+            <argument index="1" name="shared_texture_id" type="int" />
+            <argument index="2" name="invert" type="bool" default="true" />
+            <argument index="3" name="host_fbo" type="int" default="0" />
+            <description>
+                Send an OpenGL texture.
+                [code]sender_send_texture[/code] creates a shared texture for all receivers to access.
+                The invert flag is optional and by default true. This flips the texture in the Y axis, which is necessary because OpenGL textures are upside. If it is set to false, no flip occurs and the result may appear upside down.
+                The host fbo argument is optional. An fbo ID is necessary if the texture is currently bound, otherwise the binding is lost.
+            </description>
+        </method>
+        <method name="sender_send_image">
+            <return type="Error" />
+            <argument index="0" name="image" type="Image" />
+            <argument index="1" name="bool" type="bool" default="false" />
+            <argument index="2" name="gl_format" type="int" default="GL_RGBA (platform implementation detail)" />
+            <description>
+                Send a pixel image.
+                [code]sender_send_image[/code] creates a shared texture using image pixels as the source instead of an OpenGL texture. The format of the image to be sent is RGBA by default but can be a different OpenGL format (e.g. GL_RGB or GL_BGRA_EXT).
+                The invert flag is optional and [code]false[/code] by default.
+                Like with [code]sender_send_texture[/code], the ID of a currently bound fbo can be passed in.
+                NOTE: Param order is slightly adjusted. The [code]gl_format[/code] does not map back to the built-in Godot enum. Instead, it is an implementation detail on Windows. Only use [code]gl_format[/code] if you know what you are doing.
+            </description>
+        </method>
+        <method name="sender_get_name">
+            <return type="String" />
+            <description>
+                Get the sender name.
+            </description>
+        </method>
+        <method name="sender_get_fps">
+            <return type="float" />
+            <description>
+                Get the sender frame rate.
+            </description>
+        </method>
+        <method name="sender_get_frame">
+            <return type="float" />
+            <description>
+                Get the sender frame number.
+            </description>
+        </method>
+        <method name="sender_get_cpu">
+            <return type="bool" />
+            <description>
+                Returns [code]true[/code] if the sender is using CPU methods.
+            </description>
+        </method>
+        <method name="sender_get_gldx">
+            <return type="bool" />
+            <description>
+                Returns [code]true[/code] if the sender graphics hardware is compatible with NVIDIA NV_DX_interpo2 extension.
+            </description>
+        </method>
+
+        <!-- Receiver -->
+
+        <method name="receiver_set_receiver_name">
+            <return type="void" />
+            <argument index="0" name="sender_name" type="String" default="&quot;&quot;" />
+            <description>
+                Specify a sender for connection.
+                If a name is specified, the receiver will not connect to any other unless the user selects one.
+                If that sender closes, the receiver will wait for the nominated sender to open.
+                If no name is specified, the receiver will connect to the active sender.
+            </description>
+        </method>
+        <method name="receiver_release_receiver">
+            <return type="void" />
+            <description>
+                Close the receiver, release resources, and be ready to connect to another sender.
+            </description>
+        </method>
+        <method name="receiver_receive_texture">
+            <return type="Error" />
+            <argument index="0" name="godot_texture_id" type="int" />
+            <argument index="1" name="shared_texture_id" type="int" />
+            <argument index="2" name="invert" type="bool" default="false" />
+            <argument index="3" name="host_fbo" type="int" default="0" />
+            <description>
+                Receive valid OpenGL texture.
+                Copy from the sender shared texture if there is texture to receive into. The receiving OpenGL texture can only be RGBA of dimension (width * height) and must be reallocated if [code]receiver_is_updated[/code] returns [code]true[/code]. Return if flagged for update. The update flag is reset when the receiving application calls [code]receiver_is_updated[/code].
+                If no arguments are passed, then connect to a sender, retrieve shared texture details, initialize GL interop for OpenGL texture access, and update the sender shared texture, frame count, and framerate. The texture can then be accessed using [code]bind_shared_texture[/code], [code]unbind_shared_texture[/code], and [code]get_shared_texture_id[/code].
+                As with [code]sender_send_texture[/code], the [code]host_fbo[/code] argument is optional. An fbo ID is necessary if the texture is currently bound, otherwise the binding is lost.
+            </description>
+        </method>
+        <method name="receiver_receive_image">
+            <return type="Error" />
+            <argument index="0" name="image" type="Image" />
+            <argument index="1" name="invert" type="bool" default="false" />
+            <argument index="2" name="host_fbo" type="int" default="0" />
+            <argument index="3" name="gl_format" type="int" default="GL_RGBA (platform implementation detail)" />
+            <description>
+                Copy the sender texture to image pixels.
+                Formats supported are: GL_RGBA, GL_RGB, GL_BGRA_EXT, GL_BGR_EXT. GL_BGRA_EXT and GL_BGR_EXT are dependent on those extension being supported at runtime. If they are not, the rgba and rgb equivalents are used. The same sender size changes are handled with [code]receiver_is_updated[/code] and the receiving buffer must be reallocated if [code]receiver_is_updated[/code] returns [code]true[/code]. Images with padding on each line are not supported. The width should be a multiple of 4.
+                As with [code]receiver_receive_texture[/code], the ID of a currently bound fbo should be passed in.
+                NOTE: Param order is slightly adjusted. The [code]gl_format[/code] does not map back to the built-in Godot enum. Instead, it is an implementation detail on Windows. Only use [code]gl_format[/code] if you know what you are doing.
+            </description>
+        </method>
+        <method name="receiver_is_updated">
+            <return type="bool" />
+            <description>
+                Query whether the sender has changed.
+                Must be checked at every cycle before receiving data. If this is not done, the receiving functions will fail.
+            </description>
+        </method>
+        <method name="receiver_is_connected">
+            <return type="bool" />
+            <description>
+                Query the sender connection.
+                If the sender closes, receiving functions will return [code]false[/code].
+                The connection can be tested at any time.
+            </description>
+        </method>
+        <method name="receiver_is_frame_new">
+            <return type="bool" />
+            <description>
+                Query received frame status.
+                The receiving texture or pixel buffer is refreshed if the sender has produced a new frame. This can be queried to process texture data for only new frames.
+            </description>
+        </method>
+        <method name="receiver_get_sender_name">
+            <return type="String" />
+            <description>
+                Get the sender name.
+            </description>
+        </method>
+        <method name="receiver_get_sender_size">
+            <return type="Vector2" />
+            <description>
+                Get the sender width and height.
+            </description>
+        </method>
+        <method name="receiver_get_sender_fps">
+            <return type="float" />
+            <description>
+                Get the sender frame rate.
+            </description>
+        </method>
+        <method name="receiver_get_sender_frame">
+            <return type="float" />
+            <description>
+                Get the sender frame number.
+            </description>
+        </method>
+        <method name="receiver_get_sender_cpu">
+            <return type="bool" />
+            <description>
+                The received sender sharing mode. Returns [code]true[/code] if the sender is using CPU methods.
+            </description>
+        </method>
+        <method name="receiver_get_sender_gldx">
+            <return type="bool" />
+            <description>
+                The received sender sharing compatibility. Returns [code]true[/code] if the sender graphics hardware is compatible with the NVIDIA NV_DX_interop2 extension.
+            </description>
+        </method>
+
+        <!-- Frame counting -->
+
+        <method name="set_frame_count">
+            <return type="void" />
+            <argument index="0" name="enabled" type="bool" />
+            <description>
+                Enable or disable frame counting globally.
+            </description>
+        </method>
+        <method name="disable_frame_count">
+            <return type="void" />
+            <description>
+                Disable frame counting specifically for this application.
+            </description>
+        </method>
+        <method name="is_frame_count_enabled">
+            <return type="bool" />
+            <description>
+                Returns the frame count status.
+            </description>
+        </method>
+        <method name="hold_fps">
+            <return type="void" />
+            <argument index="0" name="fps" type="int" />
+            <description>
+                Frame rate control.
+            </description>
+        </method>
+        <method name="set_frame_sync">
+            <return type="void" />
+            <argument index="0" name="sender_name" type="String" />
+            <description>
+                Signal a sync event.
+            </description>
+        </method>
+
+        <!-- Data sharing -->
+
+        <method name="write_memory_buffer">
+            <return type="Error" />
+            <argument index="0" name="sender_name" type="String" />
+            <argument index="1" name="data" type="PoolByteArray" />
+            <argument index="2" name="length" type="int" />
+            <description>
+                Write a buffer to shared memory.
+                If shared memory has not been created in advance, it will be created on the first call to this function at the length specified.
+                This is acceptable if the data to send is fixed in length. Otherwise, the shared memory should be created with sufficient size in advance to contain the maximum length expected. See [code]create_memory_buffer[/code].
+                The map is closed when the sender is released.
+            </description>
+        </method>
+        <method name="read_memory_buffer">
+            <return type="PoolByteArray" />
+            <argument index="0" name="sender_name" type="String" />
+            <argument index="1" name="max_length" type="int" />
+            <description>
+                Read shared memory to a buffer.
+                Open a memory map and retain the handle. The map is closed when the receiver is released.
+            </description>
+        </method>
+        <method name="create_memory_buffer">
+            <return type="Error" />
+            <argument index="0" name="name" type="String" />
+            <argument index="1" name="length" type="int" />
+            <description>
+                Create a shared memory buffer.
+                Create a memory map and retain the handle. This function should be called before any buffer write if the length of the data to send will vary. The map is closed when the sender is released.
+            </description>
+        </method>
+        <method name="delete_memory_buffer">
+            <return type="Error" />
+            <description>
+                Delete a shared memory buffer.
+            </description>
+        </method>
+        <method name="get_memory_buffer_size">
+            <return type="int" />
+            <argument index="0" name="name" type="String" />
+            <description>
+                Get the number of bytes available for data transfer.
+            </description>
+        </method>
+
+        <!-- Log utilities -->
+
+        <method name="enable_spout_log">
+            <return type="void" />
+            <description>
+                Enable logging to the console.
+                Logs are displayed in a console window. Useful for program development.
+            </description>
+        </method>
+        <method name="enable_spout_log_file">
+            <return type="void" />
+            <argument index="0" name="filename" type="String" />
+            <argument index="1" name="append" type="bool" default="false" />
+            <description>
+                Enable logging to a file. Optionally appends to the file.
+                You can instead, or additional to a console window, specify output to a text file with the extension of your choice. The log file is recreated every time the application starts unless you specify to append to the existing one. The file is saved in the [code]%AppData%[/code] folder unless you specify the full path.
+                You can find and examine the log file after the application has run.
+            </description>
+        </method>
+        <method name="get_spout_logs">
+            <return type="String" />
+            <description>
+                Returns the log file as a [code]String[/code].
+            </description>
+        </method>
+        <method name="show_spout_logs">
+            <return type="void" />
+            <description>
+                Show the log file folder in Windows Explorer.
+            </description>
+        </method>
+        <method name="disable_spout_log">
+            <return type="void" />
+            <description>
+                Disable logging to the console and file.
+            </description>
+        </method>
+        <method name="set_spout_log_level">
+            <return type="void" />
+            <argument index="0" name="level" type="int" enum="SpoutLogLevel" />
+            <description>
+                Set the current log level.
+            </description>
+        </method>
+        <method name="spout_log">
+            <return type="void" />
+            <argument index="0" name="format" type="String" />
+            <description>
+                General purpose log.
+                Godot's built-in [code]print[/code] should be preferred.
+            </description>
+        </method>
+        <method name="spout_log_verbose">
+            <return type="void" />
+            <argument index="0" name="format" type="String" />
+            <description>
+                [code]Verbose[/code] logging for [code]SPOUT_LOG_VERBOSE[/code] or above.
+                Godot's built-in [code]print[/code] should be preferred.
+            </description>
+        </method>
+        <method name="spout_log_notice">
+            <return type="void" />
+            <argument index="0" name="format" type="String" />
+            <description>
+                [code]Notice[/code] logging for [code]SPOUT_LOG_NOTICE[/code] or above.
+            </description>
+        </method>
+        <method name="spout_log_warning">
+            <return type="void" />
+            <argument index="0" name="format" type="String" />
+            <description>
+                [code]Warning[/code] logging for [code]SPOUT_LOG_WARNING[/code] or above.
+            </description>
+        </method>
+        <method name="spout_log_error">
+            <return type="void" />
+            <argument index="0" name="format" type="String" />
+            <description>
+                [code]Notice[/code] logging for [code]SPOUT_LOG_ERROR[/code] or above.
+            </description>
+        </method>
+        <method name="spout_log_fatal">
+            <return type="void" />
+            <argument index="0" name="format" type="String" />
+            <description>
+                [code]Fatal[/code] logging that is always shown.
+            </description>
+        </method>
+
+        <!-- OpenGL shared texture -->
+
+        <method name="is_initialized">
+            <return type="bool" />
+            <description>
+                The initialization status
+            </description>
+        </method>
+        <method name="bind_shared_texture">
+            <return type="bool" />
+            <description>
+                Bind an OpenGL shared texture.
+            </description>
+        </method>
+        <method name="unbind_shared_texture">
+            <return type="bool" />
+            <description>
+                Unbind an OpenGL shared texture.
+            </description>
+        </method>
+        <method name="get_shared_texture_id">
+            <return type="int" />
+            <description>
+                Get the bound OpenGL shared texture ID.
+            </description>
+        </method>
+
+        <!-- Sender names -->
+
+        <method name="get_sender_count">
+            <return type="int" />
+            <description>
+                The number of senders.
+            </description>
+        </method>
+        <method name="get_sender">
+            <return type="String" />
+            <argument index="0" name="index" type="int" />
+            <argument index="1" name="max_size" type="int" default="256" />
+            <description>
+                Get the sender item name in the sender names list.
+            </description>
+        </method>
+        <method name="find_sender_name">
+            <return type="bool" />
+            <argument index="0" name="sender_name" type="String" />
+            <description>
+                Find a sender in the sender names list
+            </description>
+        </method>
+        <method name="get_active_sender">
+            <return type="String" />
+            <description>
+                Get the current active sender.
+            </description>
+        </method>
+        <method name="set_active_sender">
+            <return type="Error" />
+            <argument index="0" name="sender_name" type="String" />
+            <description>
+                Set sender as active.
+            </description>
+        </method>
+
+        <!-- Information -->
+
+        <method name="get_host_path">
+            <return type="String" />
+            <argument index="0" name="sender_name" type="String" />
+            <argument index="1" name="max_chars" type="int" />
+            <description>
+                The path of the host that produced the sender.
+                Retrieved frm the description string in the sender info memory map.
+            </description>
+        </method>
+        <method name="get_vertical_sync">
+            <return type="int" />
+            <description>
+                Get the vertical sync status.
+            </description>
+        </method>
+        <method name="set_vertical_sync">
+            <return type="Error" />
+            <argument index="0" name="sync" type="bool" default="true" />
+            <description>
+                Lock sharing to the monitor vertical sync.
+            </description>
+        </method>
+        <method name="get_spout_version">
+            <return type="int" />
+            <description>
+                Get the current Spout version.
+            </description>
+        </method>
+
+        <!-- Graphics compatibility -->
+
+        <method name="get_auto_share">
+            <return type="bool" />
+            <description>
+                Get auto GPU/CPU share depending on compatibility.
+            </description>
+        </method>
+        <method name="set_auto_share">
+            <return type="void" />
+            <argument index="0" name="auto" type="bool" default="true" />
+            <description>
+                Set auto GPU/CPU share depending on compatibility.
+            </description>
+        </method>
+        <method name="is_gldx_ready">
+            <return type="bool" />
+            <description>
+                Get OpenGL texture share compatibility.
+            </description>
+        </method>
+
+        <!-- Graphics adapter -->
+
+        <method name="get_num_adapters">
+            <return type="int" />
+            <description>
+                The number of graphics adapters in the system.
+            </description>
+        </method>
+        <method name="get_adapter_name">
+            <return type="String" />
+            <argument index="0" name="index" type="int" />
+            <argument index="1" name="max_chars" type="int" default="256" />
+            <description>
+                Gets the adapter name.
+            </description>
+        </method>
+        <method name="adapter_name">
+            <return type="String" />
+            <description>
+                Get the current adapter name.
+            </description>
+        </method>
+        <method name="get_adapter">
+            <return type="int" />
+            <description>
+                Get the current adapter index.
+            </description>
+        </method>
+        <method name="set_adapter">
+            <return type="Error" />
+            <argument index="0" name="index" type="int" default="0" />
+            <description>
+                Set the graphics adapter for output.
+            </description>
+        </method>
+
+        <!-- Custom -->
+
+        <method name="get_senders">
+            <return type="Array" />
+            <description>
+                Wrapper function for getting a list of available senders.
+            </description>
+        </method>
+	</methods>
+	<members>
+        <member name="send_size" type="Vector2" setter="set_send_size" getter="get_send_size">
+            The size to use when sending over Spout.
+        </member>
+	</members>
+	<constants>
+        <constant name="SPOUT_LOG_SILENT" value="0" enum="SpoutLogLevel">
+            Log level silent.
+        </constant>
+        <constant name="SPOUT_LOG_VERBOSE" value="1" enum="SpoutLogLevel">
+            Log level verbose.
+        </constant>
+        <constant name="SPOUT_LOG_NOTICE" value="2" enum="SpoutLogLevel">
+            Log level notice.
+        </constant>
+        <constant name="SPOUT_LOG_WARNING" value="3" enum="SpoutLogLevel">
+            Log level warning.
+        </constant>
+        <constant name="SPOUT_LOG_ERROR" value="4" enum="SpoutLogLevel">
+            Log level error.
+        </constant>
+        <constant name="SPOUT_LOG_FATAL" value="5" enum="SpoutLogLevel">
+            Log level fatal.
+        </constant>
+	</constants>
+</class>

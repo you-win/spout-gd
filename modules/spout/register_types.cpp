@@ -2,10 +2,9 @@
 
 #include "spout_gd.h"
 
-void register_spout_types() {
-    ClassDB::register_class<SpoutGD>();
+void register_spout_gd_types() {
+	ClassDB::register_class<Spout>();
 }
 
-void unregister_spout_types() {
-
+void unregister_spout_gd_types() {
 }
