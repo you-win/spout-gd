@@ -15,7 +15,15 @@ Error Spout::sender_send_fbo(const uint32_t p_fbo_id) {
 }
 
 Error Spout::sender_send_texture(const uint32_t p_godot_texture_id, const uint32_t p_shared_texture_id, const bool p_invert, const int p_host_fbo) {
-	return spout_lib->SendTexture(p_shared_texture_id, p_godot_texture_id, static_cast<unsigned int>(send_size.x), static_cast<unsigned int>(send_size.y), p_invert, static_cast<GLuint>(p_host_fbo)) ? Error::FAILED : Error::OK;
+	return spout_lib->SendTexture(
+				   static_cast<GLuint>(p_godot_texture_id),
+				   static_cast<GLuint>(p_shared_texture_id),
+				   static_cast<unsigned int>(send_size.x),
+				   static_cast<unsigned int>(send_size.y),
+				   p_invert,
+				   static_cast<GLuint>(p_host_fbo))
+			? Error::OK
+			: Error::FAILED;
 }
 
 Error Spout::sender_send_image(Ref<Image> p_image, const bool p_invert, const int p_gl_format) {
@@ -380,7 +388,7 @@ void Spout::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("sender_set_sender_name", "sender_name"), &Spout::sender_set_sender_name, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("sender_release_sender", "msec"), &Spout::sender_release_sender, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("sender_send_fbo", "fbo_id"), &Spout::sender_send_fbo);
-	ClassDB::bind_method(D_METHOD("sender_send_texture", "shared_texture_id", "godot_texture_id", "invert", "host_fbo"), &Spout::sender_send_texture, DEFVAL(0), DEFVAL(0), DEFVAL(false), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("sender_send_texture", "godot_texture_id", "shared_texture_id", "invert", "host_fbo"), &Spout::sender_send_texture, DEFVAL(0), DEFVAL(0), DEFVAL(false), DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("sender_send_image", "image", "invert", "gl_format"), &Spout::sender_send_image, DEFVAL(false), DEFVAL(GL_RGBA));
 	ClassDB::bind_method(D_METHOD("sender_get_name"), &Spout::sender_get_name);
 	ClassDB::bind_method(D_METHOD("sender_get_fps"), &Spout::sender_get_fps);
@@ -390,7 +398,7 @@ void Spout::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("receiver_set_receiver_name", "sender_name"), &Spout::receiver_set_receiver_name, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("receiver_release_receiver"), &Spout::receiver_release_receiver);
-	ClassDB::bind_method(D_METHOD("receiver_receive_texture", "shared_texture_id", "godot_texture_id", "invert", "host_fbo"), &Spout::receiver_receive_texture, DEFVAL(false), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("receiver_receive_texture", "godot_texture_id", "shared_texture_id", "invert", "host_fbo"), &Spout::receiver_receive_texture, DEFVAL(false), DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("receiver_receive_image", "image", "invert", "host_fbo", "gl_format"), &Spout::receiver_receive_image, DEFVAL(false), DEFVAL(0), DEFVAL(GL_RGBA));
 	ClassDB::bind_method(D_METHOD("receiver_is_updated"), &Spout::receiver_is_updated);
 	ClassDB::bind_method(D_METHOD("receiver_is_connected"), &Spout::receiver_is_connected);
