@@ -324,8 +324,8 @@ bool Spout::get_auto_share() {
 	return spout_lib->GetAutoShare();
 }
 
-void Spout::set_auto_share(const bool p_auto) {
-	spout_lib->SetAutoShare(p_auto);
+void Spout::set_auto_share(const bool p_is_auto) {
+	spout_lib->SetAutoShare(p_is_auto);
 }
 
 bool Spout::is_gldx_ready() {
@@ -452,7 +452,7 @@ void Spout::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_spout_version"), &Spout::get_spout_version);
 
 	ClassDB::bind_method(D_METHOD("get_auto_share"), &Spout::get_auto_share);
-	ClassDB::bind_method(D_METHOD("set_auto_share", "auto"), &Spout::set_auto_share, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("set_auto_share", "is_auto"), &Spout::set_auto_share, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("is_gldx_ready"), &Spout::is_gldx_ready);
 
 	ClassDB::bind_method(D_METHOD("get_num_adapters"), &Spout::get_num_adapters);

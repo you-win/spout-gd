@@ -133,7 +133,7 @@ public:
 #pragma region Graphics compatibility
 
 	bool get_auto_share();
-	void set_auto_share(const bool p_auto = true);
+	void set_auto_share(const bool p_is_auto = true);
 	bool is_gldx_ready();
 
 #pragma endregion
