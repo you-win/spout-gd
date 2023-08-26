@@ -2,7 +2,13 @@
 
 set -e
 
-ROOT_DIR=$(basename "$0")
+if [[ "$OSTYPE" == "msys" ]]; then
+    echo "spout-gd only works on Windows"
+    exit 1
+fi
+
+ROOT_DIR=$(readlink -f "$0")
+ROOT_DIR=$(dirname "$ROOT_DIR")
 
 echo "Building Spout"
 cd Spout2
@@ -14,3 +20,6 @@ echo "Building godot-cpp"
 cd godot-cpp
 scons
 cd "$ROOT_DIR"
+
+echo "Building spout-gd"
+scons
