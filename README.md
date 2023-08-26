@@ -28,6 +28,12 @@ Run `build.sh` in a bash-compatible terminal. This will:
 * Compile the gdextension bindings
 * Compile spout-gd
 
+Once compilation is finished, the following files should be moved to your project's `addons/spout-gd` folder (create it manually if it does not exist):
+
+* `spout_gd.gdextension`
+* `Spout2/Binaries/x64/SpoutLibrary.dll`
+* `out/pick_the_correct_file_here.dll`
+
 ## Basic usage
 
 ```gdscript
