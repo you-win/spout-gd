@@ -2,6 +2,8 @@
 
 #include <gdextension_interface.h>
 
+#include "spout_gd.h"
+
 using namespace godot;
 
 void initialize_spout_gd_module(ModuleInitializationLevel p_level) {
@@ -9,7 +11,7 @@ void initialize_spout_gd_module(ModuleInitializationLevel p_level) {
         return;
     }
 
-    // godot::ClassDB::register_class<
+    godot::ClassDB::register_class<Spout>();
 }
 
 void uninitialize_spout_gd_module(ModuleInitializationLevel p_level) {

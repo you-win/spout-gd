@@ -16,7 +16,7 @@ Path(OUTPUT_DIR).mkdir(exist_ok=True)
 
 env = SConscript("godot-cpp/SConstruct")
 
-env.Append(CPPPATH=["src", "."])
+env.Append(CPPPATH=["src", "."], LIBS=["Spout2\\Binaries\\x64\\SpoutLibrary.lib"])
 
 src_directory: Path = Path("src/")
 sources: list = [Glob("src/*.cpp")]  # Need to add all files in src/ first
