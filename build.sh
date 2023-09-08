@@ -2,7 +2,7 @@
 
 set -e
 
-if [[ "$OSTYPE" == "msys" ]]; then
+if [[ "$OSTYPE" != "msys" ]]; then
     echo "spout-gd only works on Windows"
     exit 1
 fi

@@ -123,8 +123,8 @@ void Spout::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_sender_format"), &Spout::set_sender_format);
     ClassDB::bind_method(D_METHOD("release_sender"), &Spout::release_sender);
     ClassDB::bind_method(D_METHOD("send_fbo", "fbo_id", "width", "height", "invert"), &Spout::send_fbo, DEFVAL(true));
-    ClassDB::bind_method(D_METHOD("send_texture", "texture_id", "texture_target", "width", "height", "invert", "host_fbo"), &Spout::send_fbo, DEFVAL(true), DEFVAL(0));
-    ClassDB::bind_method(D_METHOD("send_image", "image", "width", "height", "gl_format", "invert"), &Spout::send_fbo, DEFVAL(Spout::RGBA), DEFVAL(true));
+    ClassDB::bind_method(D_METHOD("send_texture", "texture_id", "texture_target", "width", "height", "invert", "host_fbo"), &Spout::send_texture, DEFVAL(true), DEFVAL(0));
+    ClassDB::bind_method(D_METHOD("send_image", "image", "width", "height", "gl_format", "invert"), &Spout::send_image, DEFVAL(Spout::RGBA), DEFVAL(true));
     ClassDB::bind_method(D_METHOD("get_name"), &Spout::get_name);
     ClassDB::bind_method(D_METHOD("get_width"), &Spout::get_width);
     ClassDB::bind_method(D_METHOD("get_height"), &Spout::get_height);
