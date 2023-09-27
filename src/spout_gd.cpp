@@ -72,10 +72,23 @@ bool Spout::receive_texture(GLuint p_texture_id, GLuint p_texture_target, bool p
 }
 
 bool Spout::receive_image(Ref<Image> p_image, GLFormat p_gl_format, bool p_invert, GLuint p_host_fbo) {
-    PackedByteArray data = p_image->get_data();
+    PackedByteArray data = p_image->get_data();  // creates a copy, we must reassign afterwards
     unsigned char *p = (unsigned char *)data.ptrw();
 
-    return lib->ReceiveImage(p, p_gl_format, p_invert, p_host_fbo);
+    bool result = lib->ReceiveImage(p, p_gl_format, p_invert, p_host_fbo);
+
+    if (result) {
+        // assign the new data buffer, overwriting to the old specification
+        p_image->set_data(
+            p_image->get_width(),
+            p_image->get_height(),
+            p_image->has_mipmaps(),
+            p_image->get_format(),
+            data
+        );
+    }
+
+    return result;
 }
 
 bool Spout::is_updated() {
@@ -118,13 +131,25 @@ bool Spout::get_sender_gldx() {
     return lib->GetSenderGLDX();
 }
 
+unsigned int Spout::get_sender_count() {
+    return lib->GetSenderCount();
+}
+
+String Spout::get_sender(unsigned int idx) {
+    char senderName[256];
+    
+    lib->GetSender(idx, senderName);
+
+    return String(senderName);
+}
+
 void Spout::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_sender_name", "sender_name"), &Spout::set_sender_name);
     ClassDB::bind_method(D_METHOD("set_sender_format"), &Spout::set_sender_format);
     ClassDB::bind_method(D_METHOD("release_sender"), &Spout::release_sender);
     ClassDB::bind_method(D_METHOD("send_fbo", "fbo_id", "width", "height", "invert"), &Spout::send_fbo, DEFVAL(true));
     ClassDB::bind_method(D_METHOD("send_texture", "texture_id", "texture_target", "width", "height", "invert", "host_fbo"), &Spout::send_texture, DEFVAL(true), DEFVAL(0));
-    ClassDB::bind_method(D_METHOD("send_image", "image", "width", "height", "gl_format", "invert"), &Spout::send_image, DEFVAL(Spout::RGBA), DEFVAL(true));
+    ClassDB::bind_method(D_METHOD("send_image", "image", "width", "height", "gl_format", "invert"), &Spout::send_image, DEFVAL(Spout::FORMAT_RGBA), DEFVAL(true));
     ClassDB::bind_method(D_METHOD("get_name"), &Spout::get_name);
     ClassDB::bind_method(D_METHOD("get_width"), &Spout::get_width);
     ClassDB::bind_method(D_METHOD("get_height"), &Spout::get_height);
@@ -139,7 +164,7 @@ void Spout::_bind_methods() {
     ClassDB::bind_method(D_METHOD("receive_texture", "texture_id", "texture_target", "invert", "host_fbo"), &Spout::receive_texture, DEFVAL(0), DEFVAL(0), DEFVAL(false), DEFVAL(0));
     ClassDB::bind_method(D_METHOD("receive_image", "image", "gl_format", "invert", "host_fbo"), &Spout::receive_image, DEFVAL(false), DEFVAL(0));
     ClassDB::bind_method(D_METHOD("is_updated"), &Spout::is_updated);
-    ClassDB::bind_method(D_METHOD("is_connected"), &Spout::is_connected);
+    ClassDB::bind_method(D_METHOD("is_sender_connected"), &Spout::is_connected);
     ClassDB::bind_method(D_METHOD("is_frame_new"), &Spout::is_frame_new);
     ClassDB::bind_method(D_METHOD("get_sender_name"), &Spout::get_sender_name);
     ClassDB::bind_method(D_METHOD("get_sender_width"), &Spout::get_sender_width);
@@ -151,6 +176,13 @@ void Spout::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_sender_cpu"), &Spout::get_sender_cpu);
     ClassDB::bind_method(D_METHOD("get_sender_gldx"), &Spout::get_sender_gldx);
     ClassDB::bind_method(D_METHOD("select_sender"), &Spout::select_sender);
+
+    ClassDB::bind_method(D_METHOD("get_sender_count"), &Spout::get_sender_count);
+    ClassDB::bind_method(D_METHOD("get_sender", "index"), &Spout::get_sender, DEFVAL(0));
+
+    BIND_ENUM_CONSTANT(FORMAT_RGBA);
+    BIND_ENUM_CONSTANT(FORMAT_BGRA);
+    BIND_ENUM_CONSTANT(FORMAT_BGRA_EXT);
 }
 
 Spout::Spout() {

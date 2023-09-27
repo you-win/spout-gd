@@ -30,9 +30,9 @@ class Spout : public RefCounted {
     };
 
     enum GLFormat {
-        RGBA = 0x1908,
-        BGRA = 0x80E1,
-        BGRA_EXT = 0x80E1
+        FORMAT_RGBA = 0x1908,
+        FORMAT_BGRA = 0x80E1,
+        FORMAT_BGRA_EXT = 0x80E1
     };
 
     void set_sender_name(const String &p_sender_name = String());
@@ -43,7 +43,7 @@ class Spout : public RefCounted {
     void release_sender();
     bool send_fbo(GLuint p_fbo_id, unsigned int p_width, unsigned int p_height, bool p_invert = true);
     bool send_texture(GLuint p_texture_id, GLuint p_texture_target, unsigned int p_width, unsigned int p_height, bool p_invert = true, GLuint p_host_fbo = 0);
-    bool send_image(const Ref<Image> p_image, unsigned int p_width, unsigned int p_height, GLFormat p_gl_format = GLFormat::RGBA, bool p_invert = false);
+    bool send_image(const Ref<Image> p_image, unsigned int p_width, unsigned int p_height, GLFormat p_gl_format = GLFormat::FORMAT_RGBA, bool p_invert = false);
     String get_name();
     unsigned int get_width();
     unsigned int get_height();
@@ -78,6 +78,10 @@ class Spout : public RefCounted {
     void select_sender() {
         UtilityFunctions::printerr("Not supported!");
     }
+
+    // utility functions
+    unsigned int get_sender_count();
+    String get_sender(unsigned int idx);
 
     Spout();
     ~Spout();
