@@ -44,3 +44,13 @@ func _ready():
     
     spout.send_image(my_image, image.get_width(), image.get_height())
 ```
+
+## SpoutTexture - Simple Receiving 
+
+Provided as a convenience is a Texture resource for receiving streams from a Spout sender.  You can use this any place you can use any other kind of Texture, including places like UI elements and Materials on 3D objects.
+
+The sender is polled per render cycle.  
+
+<img src="https://github.com/erodozer/spout-gd/assets/316728/989389ab-23ed-4ae0-8ccc-ca9ba51f6346" width=400>
+
+<img src="https://github.com/erodozer/spout-gd/assets/316728/dab4ed75-e046-4197-be50-5d634216b7c2" width=600>

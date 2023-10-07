@@ -24,15 +24,17 @@ jobs:
       run: |
         cmake -DSKIP_INSTALL_ALL=OFF -DSKIP_INSTALL_HEADERS=OFF -DSKIP_INSTALL_LIBRARIES=OFF -DSPOUT_BUILD_LIBRARY=ON --fresh .
         cmake --build . --clean-first
-    - name: Build spout-gd extension
-      run: scons
+    - name: Build spout-gd extension (Debug)
+      run: scons target=template_debug
+    - name: Build spout-gd extension (Release)
+      run: scons target=template_release
     - name: prepare for packaging
       run: |
         mkdir artifact\addons\spout-gd
+        copy out/spout_gd.windows.template_release.dll artifact\addons\spout-gd
         copy out/spout_gd.windows.template_debug.dll artifact\addons\spout-gd
         copy Spout2/Binaries/x64/SpoutLibrary.dll artifact\addons\spout-gd
         copy spout_gd.gdextension artifact\addons\spout-gd
-        copy SpoutTexture.gd artifact\addons\spout-gd
     - name: save artifact
       uses: actions/upload-artifact@v3
       with:
