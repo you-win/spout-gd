@@ -32,6 +32,7 @@ jobs:
         copy out/spout_gd.windows.template_debug.dll artifact\addons\spout-gd
         copy Spout2/Binaries/x64/SpoutLibrary.dll artifact\addons\spout-gd
         copy spout_gd.gdextension artifact\addons\spout-gd
+        copy SpoutTexture.gd artifact\addons\spout-gd
     - name: save artifact
       uses: actions/upload-artifact@v3
       with:
