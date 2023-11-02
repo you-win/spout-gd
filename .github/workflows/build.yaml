@@ -1,0 +1,40 @@
+run-name: Build Spout-gd Extension
+on: push
+jobs:
+  build:
+    name: Build library
+    runs-on: windows-latest
+    steps:
+    - name: Install cmake
+      uses: crazy-max/ghaction-chocolatey@v3.0.0
+      with:
+        args: install cmake -y --installargs="ADD_CMAKE_TO_PATH=System"
+    - name: Install Python
+      uses: crazy-max/ghaction-chocolatey@v3.0.0
+      with:
+        args: install python311 -y --installargs="/quiet InstallAllUsers=1 PrependPath=1 Include_test=0"
+    - name: Install scons
+      run: pip install scons
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+    - name: Build Spout Library
+      working-directory: Spout2
+      run: |
+        cmake -DSKIP_INSTALL_ALL=OFF -DSKIP_INSTALL_HEADERS=OFF -DSKIP_INSTALL_LIBRARIES=OFF -DSPOUT_BUILD_LIBRARY=ON --fresh .
+        cmake --build . --clean-first
+    - name: Build spout-gd extension
+      run: scons
+    - name: prepare for packaging
+      run: |
+        mkdir artifact\addons\spout-gd
+        copy out/spout_gd.windows.template_debug.dll artifact\addons\spout-gd
+        copy Spout2/Binaries/x64/SpoutLibrary.dll artifact\addons\spout-gd
+        copy spout_gd.gdextension artifact\addons\spout-gd
+        copy SpoutTexture.gd artifact\addons\spout-gd
+    - name: save artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: spout-gd
+        path: artifact
