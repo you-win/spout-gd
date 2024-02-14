@@ -5,3 +5,11 @@ compatibility_minimum = 4.2
 [libraries]
 windows.debug.x86_64 = "res://addons/spout-gd/spout_gd.windows.template_debug.dll"
 windows.release.x86_64 = "res://addons/spout-gd/spout_gd.windows.template_release.dll"
+
+[dependencies]
+windows.debug.x86_64 = {
+    "SpoutLibrary.dll": ""
+}
+windows.release.x86_64 = {
+    "SpoutLibrary.dll": ""
+}
