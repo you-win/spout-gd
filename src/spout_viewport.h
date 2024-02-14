@@ -5,6 +5,7 @@
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/viewport.hpp>
 #include <godot_cpp/classes/viewport_texture.hpp>
+#include <godot_cpp/classes/sub_viewport.hpp>
 
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -14,8 +15,8 @@
 
 using namespace godot;
 
-class SpoutViewport : public Viewport {
-    GDCLASS(SpoutViewport, Viewport);
+class SpoutViewport : public SubViewport {
+    GDCLASS(SpoutViewport, SubViewport);
 
     private:
         Spout *_spout;
