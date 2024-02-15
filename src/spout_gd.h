@@ -30,6 +30,7 @@ class Spout : public RefCounted {
     };
 
     enum GLFormat {
+        FORMAT_RGB = 0x1907,
         FORMAT_RGBA = 0x1908,
         FORMAT_BGRA = 0x80E1,
         FORMAT_BGRA_EXT = 0x80E1

@@ -8,9 +8,6 @@ void SpoutViewport::_bind_methods() {
 
 void SpoutViewport::set_sender_name(String sender_name) {
     _sender_name = sender_name;
-
-    _spout->release_receiver();
-    _spout->set_receiver_name(sender_name);
 }
 
 String SpoutViewport::get_sender_name() const {
@@ -22,35 +19,52 @@ void SpoutViewport::poll_server() {
         return;
     }
 
-    String active_name = _spout->get_sender_name();
-    if (active_name != _sender_name) {
+    if (!is_inside_tree()) {
+        return;
+    }
+
+    if (_spout->get_sender_name() != _sender_name) {
+        _spout->release_sender();
         _spout->set_sender_name(_sender_name);
     }
 
     auto image = get_texture()->get_image();
-
+    image->clear_mipmaps();
     _spout->send_image(
-        image,
+        get_texture()->get_image(),
         image->get_width(),
-        image->get_height()
+        image->get_height(),
+        has_transparent_background() ? Spout::GLFormat::FORMAT_RGBA : Spout::GLFormat::FORMAT_RGB,
+        false
     );
+}
+
+void SpoutViewport::_notification(int p_what) {
+    if (p_what == NOTIFICATION_READY && !Engine::get_singleton()->is_editor_hint()) {
+        _spout = new Spout();
+
+        auto _update = callable_mp(this, &SpoutViewport::poll_server);
+
+        RenderingServer::get_singleton()->connect(
+            "frame_post_draw",
+            _update
+        );
+    }
+    else if (p_what == NOTIFICATION_PREDELETE) {
+        if (_spout != NULL) {
+            _spout->release_sender();
+        }    
+    }
 }
 
 SpoutViewport::SpoutViewport() {
     // create a placeholder image for spout
-    _spout = new Spout();
-    _sender_name = String("");
-
-    auto _update = callable_mp(this, &SpoutViewport::poll_server);
-
-    RenderingServer::get_singleton()->connect(
-        "frame_post_draw",
-        _update
-    );
+    _spout = NULL;
+    _sender_name = String("");   
 }
 
 SpoutViewport::~SpoutViewport() {
     if (_spout != NULL) {
-        _spout->release_receiver();
+        _spout->release_sender();
     }
 }
