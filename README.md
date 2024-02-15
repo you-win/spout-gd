@@ -54,3 +54,9 @@ The sender is polled per render cycle.
 <img src="https://github.com/erodozer/spout-gd/assets/316728/989389ab-23ed-4ae0-8ccc-ca9ba51f6346" width=400>
 
 <img src="https://github.com/erodozer/spout-gd/assets/316728/dab4ed75-e046-4197-be50-5d634216b7c2" width=600>
+
+## SpoutViewport - Simple Sending
+
+By wrapping the scene you wish to render in a SpoutViewport, you can easily send render target contents over Spout.  Simply use it the same way as you would a SubViewport, and assign a sender name for it to assume.
+
+The SpoutViewport is designed to only send during application run time, not within the editor.  This helps prevent creating multiple senders with the same name during testing, allowing for more stable capture.
