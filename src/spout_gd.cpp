@@ -72,15 +72,10 @@ bool Spout::receive_texture(GLuint p_texture_id, GLuint p_texture_target, bool p
 }
 
 bool Spout::receive_buffer(PackedByteArray p_data, GLFormat p_gl_format, bool p_invert, GLuint p_host_fbo) {
-    
     // ptrw creates a copy on write, so we use ptr for a direct reusable reference
     unsigned char *p = (unsigned char *)p_data.ptr();
 
     bool result = lib->ReceiveImage(p, p_gl_format, p_invert, p_host_fbo);
-
-    if (!result) {
-        godot::UtilityFunctions::print("[spout-gd] error receiving image");
-    }
 
     return result;
 }

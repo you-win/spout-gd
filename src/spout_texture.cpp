@@ -4,6 +4,9 @@ void SpoutTexture::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_sender_name", "sender_name"), &SpoutTexture::set_sender_name);
     ClassDB::bind_method(D_METHOD("get_sender_name"), &SpoutTexture::get_sender_name);
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "sender_name"), "set_sender_name", "get_sender_name");
+    ClassDB::bind_method(D_METHOD("set_update_in_editor", "enabled"), &SpoutTexture::set_update_in_editor);
+    ClassDB::bind_method(D_METHOD("can_update_in_editor"), &SpoutTexture::can_update_in_editor);
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "update_in_editor"), "set_update_in_editor", "can_update_in_editor");
 }
 
 void SpoutTexture::set_sender_name(String sender_name) {
@@ -16,6 +19,14 @@ void SpoutTexture::set_sender_name(String sender_name) {
 
 String SpoutTexture::get_sender_name() const {
     return _sender_name;
+}
+
+void SpoutTexture::set_update_in_editor(bool enabled) {
+    _update_in_editor = enabled;
+}
+
+bool SpoutTexture::can_update_in_editor() const {
+    return _update_in_editor;
 }
 
 void SpoutTexture::rebuild_image(int32_t width, int32_t height) {
@@ -40,6 +51,11 @@ void SpoutTexture::rebuild_image(int32_t width, int32_t height) {
 
 void SpoutTexture::poll_server() {
     if (is_queued_for_deletion()) {
+        return;
+    }
+
+    // allow toggling editor updates to prevent resource thrashing
+    if (Engine::get_singleton()->is_editor_hint() && !_update_in_editor) {
         return;
     }
 
@@ -69,12 +85,11 @@ SpoutTexture::SpoutTexture() {
     // create a placeholder image for spout
     _spout = new Spout();
     _sender_name = String("");
-    _image = Image::create(int32_t(1), int32_t(1), false, Image::Format::FORMAT_RGBA8);
-    _buffer = _image->get_data();
-    ImageTexture::set_image(_image);
+    _update_in_editor = false;
+    rebuild_image(1, 1);
 
     RenderingServer::get_singleton()->texture_set_force_redraw_if_visible(get_rid(), true);
-    
+
     auto _update = callable_mp(this, &SpoutTexture::poll_server);
 
     RenderingServer::get_singleton()->connect(
