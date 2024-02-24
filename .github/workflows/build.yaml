@@ -115,8 +115,18 @@ jobs:
         with:
           path: artifacts
           pattern: ${{ env.project }}.*.*
-      - name: push release
-        uses: ncipollo/release-action@v1
+      - run: ls -R artifacts
+      - run: zip -r ../../${{ env.project }}.windows.x86_64.zip *
+        working-directory: artifacts/${{ env.project }}.windows.x86_64
+      - name: push prerelease
+        uses: softprops/action-gh-release@v1
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         with:
-          artifacts: |
-            ${{ env.project }}.windows.x86_64
+          tag_name: latest
+          prerelease: true
+          files: ${{ env.project }}.windows.x86_64.zip
+      - name: push release
+        uses: softprops/action-gh-release@v1
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        with:
+          files: ${{ env.project }}.windows.x86_64.zip
