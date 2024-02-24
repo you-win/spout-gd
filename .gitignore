@@ -11,3 +11,4 @@
 *.obj
 *.dblite
 out/
+.scons_cache

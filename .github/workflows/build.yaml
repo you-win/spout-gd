@@ -1,42 +1,122 @@
-run-name: Build Spout-gd Extension
+name: Build Project
 on: push
+env:
+  project: spout_gd
 jobs:
   build:
-    name: Build library
-    runs-on: windows-latest
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - identifier: windows-debug
+            name: Windows Debug
+            runner: windows-latest
+            target: template_debug
+            platform: windows
+            arch: x86_64
+          - identifier: windows-release
+            name: Windows Release
+            runner: windows-latest
+            target: template_release
+            platform: windows
+            arch: x86_64
+    env:
+      SCONS_CACHE: ${{ github.workspace }}/.scons_cache
     steps:
-    - name: Install cmake
-      uses: crazy-max/ghaction-chocolatey@v3.0.0
-      with:
-        args: install cmake -y --installargs="ADD_CMAKE_TO_PATH=System"
-    - name: Install Python
-      uses: crazy-max/ghaction-chocolatey@v3.0.0
-      with:
-        args: install python311 -y --installargs="/quiet InstallAllUsers=1 PrependPath=1 Include_test=0"
-    - name: Install scons
-      run: pip install scons
     - name: Checkout
       uses: actions/checkout@v4
       with:
         submodules: 'true'
+    - name: Check Cache versions
+      id: caches
+      shell: bash
+      run: |
+        echo "spout_version=$(git rev-parse HEAD:Spout2)" >> $GITHUB_OUTPUT
+    - name: Cache Dependency Builds
+      id: spout_cache
+      uses: actions/cache@v4
+      with:
+        key: "spout-${{ steps.caches.outputs.spout_version }}"
+        path: |
+          ${{ github.workspace }}/Spout2
+    - name: Cache Scons Builds
+      id: cache
+      uses: actions/cache@v4
+      with:
+        key: ${{ matrix.identifier }}-${{ github.ref }}-${{ github.sha }}
+        restore-keys: |
+            ${{ matrix.identifier }}-${{ github.ref }}-${{ github.sha }}
+            ${{ matrix.identifier }}-${{ github.ref }}
+            ${{ matrix.identifier }}
+        path: ${{ env.SCONS_CACHE }}
+    - name: Install cmake
+      uses: lukka/get-cmake@fix-issue-123
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install scons
+      run: pip install scons
     - name: Build Spout Library
+      if: steps.spout_cache.outputs.cache-hit != 'true'
       working-directory: Spout2
       run: |
         cmake -DSKIP_INSTALL_ALL=OFF -DSKIP_INSTALL_HEADERS=OFF -DSKIP_INSTALL_LIBRARIES=OFF -DSPOUT_BUILD_LIBRARY=ON --fresh .
         cmake --build . --clean-first
-    - name: Build spout-gd extension (Debug)
-      run: scons target=template_debug
-    - name: Build spout-gd extension (Release)
-      run: scons target=template_release
+    - name: Build extension
+      run: scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' -j2
+    - name: save artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.project }}.${{ matrix.platform }}.${{ matrix.arch }}.${{ matrix.target }}
+        path: |
+          out/${{ env.project }}.${{ matrix.platform }}.${{ matrix.target }}.dll
+          Spout2/Binaries/x64/SpoutLibrary.dll
+          ${{ env.project }}.gdextension
+          README.md
+      
+  package:
+    needs: [build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: windows
+            arch: x86_64
+    steps:
+    - name: load artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        pattern: ${{ env.project }}.${{ matrix.platform }}.${{ matrix.arch }}.*
+        merge-multiple: true      
     - name: prepare for packaging
       run: |
-        mkdir artifact\addons\spout-gd
-        copy out/spout_gd.windows.template_release.dll artifact\addons\spout-gd
-        copy out/spout_gd.windows.template_debug.dll artifact\addons\spout-gd
-        copy Spout2/Binaries/x64/SpoutLibrary.dll artifact\addons\spout-gd
-        copy spout_gd.gdextension artifact\addons\spout-gd
+        mkdir -p release/addons/${{ env.project }}
+        cp artifacts/out/${{ env.project }}.${{ matrix.platform }}.template_release.dll release/addons/${{ env.project }}
+        cp artifacts/out/${{ env.project }}.${{ matrix.platform }}.template_debug.dll release/addons/${{ env.project }}
+        cp artifacts/Spout2/Binaries/x64/SpoutLibrary.dll release/addons/${{ env.project }}
+        cp artifacts/${{ env.project }}.gdextension release/addons/${{ env.project }}
+        cp artifacts/README.md release/addons/${{env.project}}
     - name: save artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: spout-gd
-        path: artifact
+        name: ${{ env.project }}.${{ matrix.platform }}.${{ matrix.arch }}
+        path: release
+        
+  release:
+    needs: [package]
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - name: load artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: ${{ env.project }}.*.*
+      - name: push release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            ${{ env.project }}.windows.x86_64
