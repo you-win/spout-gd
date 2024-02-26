@@ -3,8 +3,8 @@ entry_symbol = "spout_gd_library_init"
 compatibility_minimum = 4.2
 
 [libraries]
-windows.debug.x86_64 = "res://addons/spout-gd/spout_gd.windows.template_debug.dll"
-windows.release.x86_64 = "res://addons/spout-gd/spout_gd.windows.template_release.dll"
+windows.debug.x86_64 = "res://addons/spout_gd/spout_gd.windows.template_debug.dll"
+windows.release.x86_64 = "res://addons/spout_gd/spout_gd.windows.template_release.dll"
 
 [dependencies]
 windows.debug.x86_64 = {
