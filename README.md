@@ -1,13 +1,14 @@
 # Spout GD
 
-[Godot](https://github.com/godotengine/godot) 4.1.1 bindings for [Spout](https://github.com/leadedge/Spout2).
+[Godot](https://github.com/godotengine/godot) 4.2.1 bindings for [Spout](https://github.com/leadedge/Spout2).
 
 The Godot 3 engine module is located on the `godot-3` branch.
 
+Precompiled builds of the plugin can be found in the [releases](../../releases/tag/latest) section of github.
+
 ## Status
 
-The sender/receiver apis have been implemented but are mostly untested. Please open an issue
-if something doesn't seem to work.
+The sender/receiver apis have been implemented. Please open an issue if something doesn't seem to work.
 
 ## Building
 
@@ -60,3 +61,5 @@ The sender is polled per render cycle.
 By wrapping the scene you wish to render in a SpoutViewport, you can easily send render target contents over Spout.  Simply use it the same way as you would a SubViewport, and assign a sender name for it to assume.
 
 The SpoutViewport is designed to only send during application run time, not within the editor.  This helps prevent creating multiple senders with the same name during testing, allowing for more stable capture.
+
+<img src="https://github.com/erodozer/spout-gd/assets/316728/08a021a6-eaab-408e-9961-51adac31e958" width=800>
