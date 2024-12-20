@@ -23,5 +23,6 @@ cd "$ROOT_DIR"
 
 echo "Building spout-gd"
 scons
+scons target=template_release
 
-echo "Move the .gdextension file + the dll in out/ + Spout2/Binaries/x64/SpoutLibrary.dll to a new folder in addons called spout-gd"
+echo "Move the .gdextension file + the dlls in out/ + Spout2/Binaries/x64/SpoutLibrary.dll to a new folder in addons called spout-gd"
