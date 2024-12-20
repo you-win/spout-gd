@@ -32,7 +32,19 @@ Once compilation is finished, the following files should be moved to your projec
 
 * `spout_gd.gdextension`
 * `Spout2/Binaries/x64/SpoutLibrary.dll`
-* `out/pick_the_correct_file_here.dll`
+* `out/spout_gd.windows.template_debug.dll`
+* `out/spout_gd.windows.template_release.dll`
+
+Like this:
+```
+Godot_project_root
+├───addons
+│   ├───spout-gd
+│   │    ├───SpoutLibrary.dll
+│   │    ├───spout_gd.gdextension
+│   │    ├───spout_gd.windows.template_debug.dll
+│   │    ├───spout_gd.windows.template_release.dll
+```
 
 ## Basic usage
 
