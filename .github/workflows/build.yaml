@@ -1,7 +1,8 @@
 name: Build Project
 on: push
 env:
-  project: spout_gd
+  project: spout-gd
+  extension: spout_gd
 jobs:
   build:
     name: Build ${{ matrix.name }}
@@ -71,9 +72,9 @@ jobs:
       with:
         name: ${{ env.project }}.${{ matrix.platform }}.${{ matrix.arch }}.${{ matrix.target }}
         path: |
-          out/${{ env.project }}.${{ matrix.platform }}.${{ matrix.target }}.dll
+          out/${{ env.extension }}.${{ matrix.platform }}.${{ matrix.target }}.dll
           Spout2/Binaries/x64/SpoutLibrary.dll
-          ${{ env.project }}.gdextension
+          ${{ env.extension }}.gdextension
           README.md
       
   package:
@@ -94,10 +95,10 @@ jobs:
     - name: prepare for packaging
       run: |
         mkdir -p release/addons/${{ env.project }}
-        cp artifacts/out/${{ env.project }}.${{ matrix.platform }}.template_release.dll release/addons/${{ env.project }}
-        cp artifacts/out/${{ env.project }}.${{ matrix.platform }}.template_debug.dll release/addons/${{ env.project }}
+        cp artifacts/out/${{ env.extension }}.${{ matrix.platform }}.template_release.dll release/addons/${{ env.project }}
+        cp artifacts/out/${{ env.extension }}.${{ matrix.platform }}.template_debug.dll release/addons/${{ env.project }}
         cp artifacts/Spout2/Binaries/x64/SpoutLibrary.dll release/addons/${{ env.project }}
-        cp artifacts/${{ env.project }}.gdextension release/addons/${{ env.project }}
+        cp artifacts/${{ env.extension }}.gdextension release/addons/${{ env.project }}
         cp artifacts/README.md release/addons/${{env.project}}
     - name: save artifact
       uses: actions/upload-artifact@v4
