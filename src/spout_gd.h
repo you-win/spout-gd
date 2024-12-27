@@ -30,6 +30,7 @@ class Spout : public RefCounted {
     };
 
     enum GLFormat {
+        FORMAT_RGB = 0x1907,
         FORMAT_RGBA = 0x1908,
         FORMAT_BGRA = 0x80E1,
         FORMAT_BGRA_EXT = 0x80E1
@@ -58,6 +59,7 @@ class Spout : public RefCounted {
     void set_receiver_name(const String p_sender_name = String());
     void release_receiver();
     bool receive_texture(GLuint p_texture_id = 0, GLuint p_texture_target = 0, bool p_invert = false, GLuint p_host_fbo = 0);
+    bool receive_buffer(PackedByteArray p_data, GLFormat p_gl_format, bool p_invert = false, GLuint p_host_fbo = 0);
     bool receive_image(Ref<Image> p_image, GLFormat p_gl_format, bool p_invert = false, GLuint p_host_fbo = 0);
     bool is_updated();
     bool is_connected();

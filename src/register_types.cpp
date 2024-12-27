@@ -3,6 +3,8 @@
 #include <gdextension_interface.h>
 
 #include "spout_gd.h"
+#include "spout_texture.h"
+#include "spout_viewport.h"
 
 using namespace godot;
 
@@ -12,6 +14,8 @@ void initialize_spout_gd_module(ModuleInitializationLevel p_level) {
     }
 
     godot::ClassDB::register_class<Spout>();
+    godot::ClassDB::register_class<SpoutTexture>();
+    godot::ClassDB::register_class<SpoutViewport>();
 }
 
 void uninitialize_spout_gd_module(ModuleInitializationLevel p_level) {

@@ -71,14 +71,27 @@ bool Spout::receive_texture(GLuint p_texture_id, GLuint p_texture_target, bool p
     return lib->ReceiveTexture(p_texture_id, p_texture_target, p_invert, p_host_fbo);
 }
 
-bool Spout::receive_image(Ref<Image> p_image, GLFormat p_gl_format, bool p_invert, GLuint p_host_fbo) {
-    PackedByteArray data = p_image->get_data();  // creates a copy, we must reassign afterwards
-    unsigned char *p = (unsigned char *)data.ptrw();
+bool Spout::receive_buffer(PackedByteArray p_data, GLFormat p_gl_format, bool p_invert, GLuint p_host_fbo) {
+    // ptrw creates a copy on write, so we use ptr for a direct reusable reference
+    unsigned char *p = (unsigned char *)p_data.ptr();
 
     bool result = lib->ReceiveImage(p, p_gl_format, p_invert, p_host_fbo);
 
+    return result;
+}
+
+bool Spout::receive_image(Ref<Image> p_image, GLFormat p_gl_format, bool p_invert, GLuint p_host_fbo) {
+    // this creates a copy, we must reassign afterwards
+    // if you are simply sampling a Spout receiver, this function is okay
+    // when you need more performance, use receive_buffer with a reusable byte array
+    PackedByteArray data = p_image->get_data();
+
+    bool result = receive_buffer(data, p_gl_format, p_invert, p_host_fbo);
+
     if (result) {
         // assign the new data buffer, overwriting to the old specification
+        // this must happen as close to the vector as possible,
+        // otherwise it might get refcounted away
         p_image->set_data(
             p_image->get_width(),
             p_image->get_height(),
