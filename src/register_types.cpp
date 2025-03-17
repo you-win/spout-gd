@@ -13,9 +13,9 @@ void initialize_spout_gd_module(ModuleInitializationLevel p_level) {
         return;
     }
 
-    godot::ClassDB::register_class<Spout>();
-    godot::ClassDB::register_class<SpoutTexture>();
-    godot::ClassDB::register_class<SpoutViewport>();
+    GDREGISTER_CLASS(Spout);
+    GDREGISTER_CLASS(SpoutTexture);
+    GDREGISTER_CLASS(SpoutViewport);
 }
 
 void uninitialize_spout_gd_module(ModuleInitializationLevel p_level) {
