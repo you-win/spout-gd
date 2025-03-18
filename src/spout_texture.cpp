@@ -83,7 +83,7 @@ void SpoutTexture::poll_server() {
 
 SpoutTexture::SpoutTexture() {
     // create a placeholder image for spout
-    _spout = new Spout();
+    _spout = memnew(Spout);
     _sender_name = String("");
     _update_in_editor = false;
     rebuild_image(1, 1);
