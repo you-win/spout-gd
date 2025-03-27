@@ -31,7 +31,7 @@ void SpoutViewport::poll_server() {
     auto image = get_texture()->get_image();
     image->clear_mipmaps();
     _spout->send_image(
-        get_texture()->get_image(),
+        image,
         image->get_width(),
         image->get_height(),
         has_transparent_background() ? Spout::GLFormat::FORMAT_RGBA : Spout::GLFormat::FORMAT_RGB,
