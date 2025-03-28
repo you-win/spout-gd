@@ -21,7 +21,7 @@ class SpoutViewport : public SubViewport {
     GDCLASS(SpoutViewport, SubViewport);
 
     private:
-        Spout *_spout;
+        Ref<Spout> _spout;
         String _sender_name;
 
         void poll_server();
