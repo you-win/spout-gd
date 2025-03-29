@@ -41,7 +41,7 @@ void SpoutViewport::poll_server() {
 
 void SpoutViewport::_notification(int p_what) {
     if (p_what == NOTIFICATION_READY && !Engine::get_singleton()->is_editor_hint()) {
-        _spout = new Spout();
+        _spout = Ref(memnew(Spout));
 
         auto _update = callable_mp(this, &SpoutViewport::poll_server);
 
@@ -51,7 +51,7 @@ void SpoutViewport::_notification(int p_what) {
         );
     }
     else if (p_what == NOTIFICATION_PREDELETE) {
-        if (_spout != NULL) {
+        if (_spout != nullptr) {
             _spout->release_sender();
         }    
     }
@@ -59,12 +59,11 @@ void SpoutViewport::_notification(int p_what) {
 
 SpoutViewport::SpoutViewport() {
     // create a placeholder image for spout
-    _spout = NULL;
     _sender_name = String("");   
 }
 
 SpoutViewport::~SpoutViewport() {
-    if (_spout != NULL) {
+    if (_spout != nullptr) {
         _spout->release_sender();
     }
 }

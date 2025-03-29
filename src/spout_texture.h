@@ -19,7 +19,7 @@ class SpoutTexture : public ImageTexture {
     GDCLASS(SpoutTexture, ImageTexture);
 
     private:
-        Spout *_spout;
+        Ref<Spout> _spout;
         Ref<Image> _image;
         PackedByteArray _buffer;
         String _sender_name;
