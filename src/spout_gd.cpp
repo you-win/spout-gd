@@ -27,6 +27,11 @@ bool Spout::send_image(const Ref<Image> p_image, unsigned int p_width, unsigned 
     return lib->SendImage(p, p_width, p_height, p_gl_format, p_invert);
 }
 
+bool Spout::send_bytes(const PackedByteArray& bytes, unsigned int p_width, unsigned int p_height, GLFormat p_gl_format, bool p_invert) {
+    const unsigned char *p = (const unsigned char *)bytes.ptr();
+    return lib->SendImage(p, p_width, p_height, p_gl_format, p_invert);
+}
+
 String Spout::get_name() {
     return String(lib->GetName());
 }
@@ -163,6 +168,7 @@ void Spout::_bind_methods() {
     ClassDB::bind_method(D_METHOD("send_fbo", "fbo_id", "width", "height", "invert"), &Spout::send_fbo, DEFVAL(true));
     ClassDB::bind_method(D_METHOD("send_texture", "texture_id", "texture_target", "width", "height", "invert", "host_fbo"), &Spout::send_texture, DEFVAL(true), DEFVAL(0));
     ClassDB::bind_method(D_METHOD("send_image", "image", "width", "height", "gl_format", "invert"), &Spout::send_image, DEFVAL(Spout::FORMAT_RGBA), DEFVAL(true));
+    ClassDB::bind_method(D_METHOD("send_bytes", "bytes", "width", "height", "gl_format", "invert"), &Spout::send_bytes, DEFVAL(Spout::FORMAT_RGBA), DEFVAL(true));
     ClassDB::bind_method(D_METHOD("get_name"), &Spout::get_name);
     ClassDB::bind_method(D_METHOD("get_width"), &Spout::get_width);
     ClassDB::bind_method(D_METHOD("get_height"), &Spout::get_height);

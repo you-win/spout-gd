@@ -13,6 +13,10 @@
 #include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/variant/rid.hpp>
 
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <condition_variable>
 #include "spout_gd.h"
 
 using namespace godot;
@@ -24,7 +28,17 @@ class SpoutViewport : public SubViewport {
         Ref<Spout> _spout;
         String _sender_name;
 
+        godot::Vector2i _size;
+        PackedByteArray _buffer;
+
+        std::thread _spout_thread;
+        std::condition_variable _spout_signal;
+        std::mutex _buffer_mutex;
+        std::atomic<bool> _new_frame_ready{false};
+        bool _stop_worker = false;
+
         void poll_server();
+        void start_worker_thread();
     protected:
         static void _bind_methods();
         void _notification(int p_what);
