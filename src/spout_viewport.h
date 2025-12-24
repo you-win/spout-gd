@@ -23,7 +23,8 @@ class SpoutViewport : public SubViewport {
     private:
         Ref<Spout> _spout;
         String _sender_name;
-
+        bool _using_gl_renderer;
+        
         void poll_server();
     protected:
         static void _bind_methods();

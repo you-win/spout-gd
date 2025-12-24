@@ -23,20 +23,39 @@ void SpoutViewport::poll_server() {
         return;
     }
 
+    if (_spout == nullptr) {
+        return;
+    }
+
     if (_spout->get_sender_name() != _sender_name) {
         _spout->release_sender();
         _spout->set_sender_name(_sender_name);
     }
 
-    auto image = get_texture()->get_image();
-    image->clear_mipmaps();
-    _spout->send_image(
-        image,
-        image->get_width(),
-        image->get_height(),
-        has_transparent_background() ? Spout::GLFormat::FORMAT_RGBA : Spout::GLFormat::FORMAT_RGB,
-        false
-    );
+    auto rs = RenderingServer::get_singleton();
+    auto size = get_size();
+    
+    // spout's API only supports GL texture handles at this moment.  If it exposes DX12 or Vulkan resource handles,
+    // switch to use RenderingDevice's get_driver_resource and send the texture handle directly
+    if (_using_gl_renderer) {
+        _spout->send_texture(
+            rs->texture_get_native_handle(get_viewport_rid()),
+            0x0DE1, // GL_TEXTURE_2D
+            size.x,
+            size.y,
+            false
+        );
+    }
+    // potentially slow, copies from GPU to CPU to send as pixels
+    else {
+        _spout->send_image(
+            get_texture()->get_image(),
+            size.x,
+            size.y,
+            has_transparent_background() ? Spout::GLFormat::FORMAT_RGBA : Spout::GLFormat::FORMAT_RGB,
+            false
+        );
+    }
 }
 
 void SpoutViewport::_notification(int p_what) {
@@ -59,7 +78,9 @@ void SpoutViewport::_notification(int p_what) {
 
 SpoutViewport::SpoutViewport() {
     // create a placeholder image for spout
-    _sender_name = String("");   
+    _sender_name = String("");
+    // detect renderer type to know if we can send textures directly over spout
+    _using_gl_renderer = RenderingServer::get_singleton()->get_current_rendering_method() == String("gl_compatibility");
 }
 
 SpoutViewport::~SpoutViewport() {
